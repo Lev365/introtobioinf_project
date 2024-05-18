@@ -6,24 +6,89 @@ date: "2024-05-12"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("GEOquery")
+library(GEOquery)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r}
+BiocManager::install("TCGAbiolinks")
+library(TCGAbiolinks)
+library(tidyverse)
+library(DESeq2)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(EnhancedVolcano)
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+dir <- getwd()
+setwd(dir)
 ```
+
+## Abstract:
+
+```         
+           *TO DO*
+```
+
+importing GSM7111782 data:
+```{r}
+GSM7111782_geo_path = getGEOSuppFiles("GSM7111782")
+GSM7111782_path=row.names(GSM7111782_geo_path)
+# gsm_GSM7111782 <- getGEO("GSM7111782")
+GSM7111782_counts <- read.table(GSM7111782_path, stringsAsFactors = FALSE, sep='\t', header=T, check.names = FALSE)
+```
+
+importing GSM7111782 phenotype data (which is in GSE213300):
+```{r}
+GSE213300_geo = getGEO("GSE213300")
+GSE213300_geo = GSE213300_geo[[1]]
+GSE213300_pheno= pData(GSE213300_geo)
+```
+
+importing GSE234092 data:
+```{r}
+GSE234092_geo_path = getGEOSuppFiles("GSE234092")
+GSE234092_path=row.names(GSE234092_geo_path)
+# gsm_GSE234092 <- getGEO("GSE234092")
+GSE234092_counts <- read.table(GSE234092_path, stringsAsFactors = FALSE, sep='\t', header=T, check.names = FALSE)
+```
+
+importing GSE234092 phenotype data:
+```{r}
+GSE234092_geo = getGEO("GSE234092")
+GSE234092_geo = GSE234092_geo[[1]]
+GSE234092_pheno= pData(GSE234092_geo)
+```
+
+importing TCGA-SARC data queries:
+```{r}
+SARC_transcriptome.query <- GDCquery(project = "TCGA-SARC", data.category = "Transcriptome Profiling")
+SARC_clinical.query <- GDCquery(project = "TCGA-SARC", data.category = "Clinical")
+SARC_biospecimen.query <- GDCquery(project = "TCGA-SARC", data.category = "Biospecimen")
+```
+
+importing TCGA-SARC transcriptome data:
+```{r}
+query.res <- getResults(SARC_transcriptome.query)
+```
+
+filtering TCGA-SARC transcriptome data query:
+```{r}
+SARC_transcriptome.query <- GDCquery(
+  project = "TCGA-SARC", 
+  data.category = "Transcriptome Profiling",
+  data.type = "Gene Expression Quantification", 
+  workflow.type = "STAR - Counts",
+  sample.type = c("Primary Tumor"))
+```
+
+# ```{r plt, echo=FALSE}
+# plot(pkt)
+# ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
